@@ -1,0 +1,90 @@
+---
+.title = "Getting started",
+.description = "Install HDR, seed your first decisions, register the checker with your harness and confirm it is wired up.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "page.shtml",
+.custom = { "section": "Start here", "next": "decisions" },
+---
+
+HDR needs Python 3.11 or later and has no runtime dependencies.
+
+# Install the CLI
+
+```sh
+uv tool install .
+hdr --help
+```
+
+Or run it from a source checkout without installing anything:
+
+```sh
+python3 -m hdr --help
+```
+
+# Seed the decision log
+
+From the root of the repository you want to govern:
+
+```sh
+hdr init --harness claude
+```
+
+Pass `--harness` once for each harness your team uses (`claude`, `codex`,
+`opencode`, `pi`). It defaults to `claude`. `init` creates two decisions, each
+with a one-entry history:
+
+| Decision | What it says |
+| --- | --- |
+| `HDR-001` | Decision histories are append-only, and only people change existing decisions. |
+| `HDR-002` | The HDR checker is registered for every lifecycle event in each listed harness. |
+
+It also writes `.hdr/.gitignore` so run reports in `.hdr/runs/` stay out of
+version control. `init` refuses to run if `.hdr` already exists.
+
+# Register the checker
+
+Install the hook for each harness, either for this repository only or for your
+user account:
+
+```sh
+hdr install claude --project
+hdr install pi --user
+```
+
+A project install is committed with the repository. A user install covers every
+repository on your machine; repositories without a `.hdr` directory are
+ignored. Each install prints what to do next, which is usually to restart the
+harness. See [Harnesses]($link.page('harnesses')) for the details of each one.
+
+># [Note]($block)
+>The installed command contains the absolute path of your Python interpreter and
+>of the HDR source. Install on each machine, and reinstall after moving the
+>checkout or replacing the interpreter.
+
+# Check the wiring
+
+```sh
+hdr check
+```
+
+`check` validates every record, confirms the checker is registered where
+`HDR-002` says it should be, evaluates state checks, and saves a run report. Exit
+code 0 means everything passed, 1 means a check failed, and 2 means invalid input
+or an error.
+
+To see the whole picture in a browser:
+
+```sh
+hdr explain
+```
+
+This writes `.hdr/runs/report.html` and opens it. It shows the decision log
+(with each decision's history), hook coverage per harness and event, configuration
+findings, and the most recent runs.
+
+# Add your own decisions
+
+Write a new file in `.hdr/decisions/` with the next free ID and one history
+entry, then run `hdr validate`. It prints how many decisions are current. Read
+[Writing decisions]($link.page('decisions')) first: histories are append-only, so a
+decision you add stays in the repository for good, even once it is retired.

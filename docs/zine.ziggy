@@ -1,0 +1,10 @@
+.zine_version = "0.14.0",
+.supermd = .{ .headings_h2 = true },
+.site = .simple(.{
+    .title = "Harness Decision Records",
+    .host_url = "https://harnessdecisionrecord.com",
+    .content_dir_path = "content",
+    .layouts_dir_path = "layouts",
+    .assets_dir_path = "assets",
+    .static_assets = [],
+}),

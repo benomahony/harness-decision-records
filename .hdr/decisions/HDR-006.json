@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "id": "HDR-006",
+  "title": "Decision records are append-only",
+  "rationale": "Agents may append records but never alter or remove one; retire a rule by superseding it. Replaces the shell-tool demo rule, which protected nothing that mattered.",
+  "supersedes": [
+    "HDR-005"
+  ],
+  "check": {
+    "kind": "append_only",
+    "path": ".hdr/decisions"
+  }
+}

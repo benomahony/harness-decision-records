@@ -1,0 +1,265 @@
+Demo repository: /tmp/hdr-demo-6m9vw2pk/repo
+Created 5 HDRs. Demo policy denies Bash and PowerShell. Review before installing.
+
+1. Fresh clone: missing configuration
+FAIL  HDR-001         SessionStart: HDR hook missing; run hdr install claude --project
+FAIL  HDR-002         PreToolUse: HDR hook missing; run hdr install claude --project
+FAIL  HDR-003         PostToolUse: HDR hook missing; run hdr install claude --project
+FAIL  HDR-004         Stop: HDR hook missing; run hdr install claude --project
+Action rules: ['HDR-005'] (evaluated on PreToolUse)
+Scope: repository state and observed settings files only. Managed policy, launch flags, plugin hooks, sandboxing and live configuration are not attested.
+Run: 36780e350955447e94aa2d33389a125e
+Repair: hdr install claude --project; review failed record paths; rerun hdr check.
+
+2. Install project hooks and check again
+Installed hooks: /tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json
+Restart Claude; existing settings preserved.
+PASS  HDR-001         SessionStart: HDR hook registered on disk
+PASS  HDR-002         PreToolUse: HDR hook registered on disk
+PASS  HDR-003         PostToolUse: HDR hook registered on disk
+PASS  HDR-004         Stop: HDR hook registered on disk
+PASS  HDR-006         Expense belongs to the event budget
+Action rules: ['HDR-005'] (evaluated on PreToolUse)
+Scope: repository state and observed settings files only. Managed policy, launch flags, plugin hooks, sandboxing and live configuration are not attested.
+Run: 44c51a533acf4bebbf0c10331a441f2e
+
+3. Simulated Claude startup and forbidden Bash call
+{"systemMessage": "HDR PASS\nPASS  HDR-001         SessionStart: HDR hook registered on disk\nPASS  HDR-002         PreToolUse: HDR hook registered on disk\nPASS  HDR-003         PostToolUse: HDR hook registered on disk\nPASS  HDR-004         Stop: HDR hook registered on disk\nPASS  HDR-006         Expense belongs to the event budget\nRun: 39fa70aac623426fab5566ccd11cd44f\nScope: repository state and observed settings files only. Managed policy, launch flags, plugin hooks, sandboxing and live configuration are not attested.", "hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "HDR PASS\nPASS  HDR-001         SessionStart: HDR hook registered on disk\nPASS  HDR-002         PreToolUse: HDR hook registered on disk\nPASS  HDR-003         PostToolUse: HDR hook registered on disk\nPASS  HDR-004         Stop: HDR hook registered on disk\nPASS  HDR-006         Expense belongs to the event budget\nRun: 39fa70aac623426fab5566ccd11cd44f"}}
+{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "HDR FAILED\nPASS  HDR-001         SessionStart: HDR hook registered on disk\nPASS  HDR-002         PreToolUse: HDR hook registered on disk\nPASS  HDR-003         PostToolUse: HDR hook registered on disk\nPASS  HDR-004         Stop: HDR hook registered on disk\nFAIL  HDR-005         Disable shell tools in this demo: tool=Bash\nRun: 5815510e95f04d2591dcc5d6ad886db5"}}
+
+4. Introduce an allocation violation, then trace the failed record
+{
+  "schema_version": 1,
+  "run_id": "b49ba3a071e343fbac8fd5ba1adb44dc",
+  "hdr_version": "0.1.0",
+  "timestamp": "2026-10-21T08:21:18.579993+00:00",
+  "root": "/tmp/hdr-demo-6m9vw2pk/repo",
+  "scope": "Scope: repository state and observed settings files only. Managed policy, launch flags, plugin hooks, sandboxing and live configuration are not attested.",
+  "passed": false,
+  "findings": [
+    {
+      "id": "HDR-001",
+      "status": "PASS",
+      "message": "SessionStart: HDR hook registered on disk",
+      "source": ".hdr/decisions/HDR-001.json",
+      "paths": [
+        "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json"
+      ]
+    },
+    {
+      "id": "HDR-002",
+      "status": "PASS",
+      "message": "PreToolUse: HDR hook registered on disk",
+      "source": ".hdr/decisions/HDR-002.json",
+      "paths": [
+        "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json"
+      ]
+    },
+    {
+      "id": "HDR-003",
+      "status": "PASS",
+      "message": "PostToolUse: HDR hook registered on disk",
+      "source": ".hdr/decisions/HDR-003.json",
+      "paths": [
+        "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json"
+      ]
+    },
+    {
+      "id": "HDR-004",
+      "status": "PASS",
+      "message": "Stop: HDR hook registered on disk",
+      "source": ".hdr/decisions/HDR-004.json",
+      "paths": [
+        "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json"
+      ]
+    },
+    {
+      "id": "HDR-006",
+      "status": "FAIL",
+      "message": "Expense belongs to the event budget",
+      "source": ".hdr/decisions/HDR-006.json",
+      "paths": [
+        "expense.json"
+      ]
+    }
+  ],
+  "action_rules": [
+    "HDR-005"
+  ],
+  "git_head": "67bd4517afbc8e0db5cc160d8d7b0adbbbea87a5",
+  "git_status": "M expense.json",
+  "policy_sha256": "2a15809e682fb5559eca0f720124702d558f05b7de2711e2e4291cd61f89e48c",
+  "evidence": {
+    ".hdr/decisions/HDR-001.json": {
+      "sha256": "83f20c3bf659ec38b460e50a8c576b1b01d34224d79132ba2ce2d5aa2ef57c8f"
+    },
+    ".hdr/decisions/HDR-002.json": {
+      "sha256": "b1d00426c334af0b909ec56c24c583eb31a9200e26e1972cf9f4642ec0fac48f"
+    },
+    ".hdr/decisions/HDR-003.json": {
+      "sha256": "69750021a9a387708117636d0bc631f87ffc3ca52757a74277e0119de8cd32b8"
+    },
+    ".hdr/decisions/HDR-004.json": {
+      "sha256": "aadcb5e02b0d7ed443618c6d665baee67e32dc435ba934d1f5477aaf64cce142"
+    },
+    ".hdr/decisions/HDR-005.json": {
+      "sha256": "0adc30458390b5ca0c95f9e307512993029ceb3c0b1b52fb74b95ac767cd7f24"
+    },
+    ".hdr/decisions/HDR-006.json": {
+      "sha256": "0e759fdf81ee9fbbde78f1dc8fab151719c1b497bc7eb0e564460197f00140df"
+    },
+    "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json": {
+      "sha256": "63522048eb9828c8ce43856a8755486aba6b713335b15fd1bc376cf43b614eec"
+    },
+    "expense.json": {
+      "sha256": "a8bfb2fb07e3e4f60de152d92bbe1da39115ccdb4c4a257300c355ccc9e93b21"
+    }
+  },
+  "config_sources": [
+    {
+      "path": "/tmp/hdr-demo-6m9vw2pk/claude/settings.json",
+      "sha256": null
+    },
+    {
+      "path": "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json",
+      "sha256": "63522048eb9828c8ce43856a8755486aba6b713335b15fd1bc376cf43b614eec"
+    },
+    {
+      "path": "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.local.json",
+      "sha256": null
+    }
+  ],
+  "event": {}
+}
+{
+  "recorded_run": {
+    "schema_version": 1,
+    "run_id": "b49ba3a071e343fbac8fd5ba1adb44dc",
+    "hdr_version": "0.1.0",
+    "timestamp": "2026-10-21T08:21:18.579993+00:00",
+    "root": "/tmp/hdr-demo-6m9vw2pk/repo",
+    "scope": "Scope: repository state and observed settings files only. Managed policy, launch flags, plugin hooks, sandboxing and live configuration are not attested.",
+    "passed": false,
+    "findings": [
+      {
+        "id": "HDR-001",
+        "status": "PASS",
+        "message": "SessionStart: HDR hook registered on disk",
+        "source": ".hdr/decisions/HDR-001.json",
+        "paths": [
+          "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json"
+        ]
+      },
+      {
+        "id": "HDR-002",
+        "status": "PASS",
+        "message": "PreToolUse: HDR hook registered on disk",
+        "source": ".hdr/decisions/HDR-002.json",
+        "paths": [
+          "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json"
+        ]
+      },
+      {
+        "id": "HDR-003",
+        "status": "PASS",
+        "message": "PostToolUse: HDR hook registered on disk",
+        "source": ".hdr/decisions/HDR-003.json",
+        "paths": [
+          "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json"
+        ]
+      },
+      {
+        "id": "HDR-004",
+        "status": "PASS",
+        "message": "Stop: HDR hook registered on disk",
+        "source": ".hdr/decisions/HDR-004.json",
+        "paths": [
+          "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json"
+        ]
+      },
+      {
+        "id": "HDR-006",
+        "status": "FAIL",
+        "message": "Expense belongs to the event budget",
+        "source": ".hdr/decisions/HDR-006.json",
+        "paths": [
+          "expense.json"
+        ]
+      }
+    ],
+    "action_rules": [
+      "HDR-005"
+    ],
+    "git_head": "67bd4517afbc8e0db5cc160d8d7b0adbbbea87a5",
+    "git_status": "M expense.json",
+    "policy_sha256": "2a15809e682fb5559eca0f720124702d558f05b7de2711e2e4291cd61f89e48c",
+    "evidence": {
+      ".hdr/decisions/HDR-001.json": {
+        "sha256": "83f20c3bf659ec38b460e50a8c576b1b01d34224d79132ba2ce2d5aa2ef57c8f"
+      },
+      ".hdr/decisions/HDR-002.json": {
+        "sha256": "b1d00426c334af0b909ec56c24c583eb31a9200e26e1972cf9f4642ec0fac48f"
+      },
+      ".hdr/decisions/HDR-003.json": {
+        "sha256": "69750021a9a387708117636d0bc631f87ffc3ca52757a74277e0119de8cd32b8"
+      },
+      ".hdr/decisions/HDR-004.json": {
+        "sha256": "aadcb5e02b0d7ed443618c6d665baee67e32dc435ba934d1f5477aaf64cce142"
+      },
+      ".hdr/decisions/HDR-005.json": {
+        "sha256": "0adc30458390b5ca0c95f9e307512993029ceb3c0b1b52fb74b95ac767cd7f24"
+      },
+      ".hdr/decisions/HDR-006.json": {
+        "sha256": "0e759fdf81ee9fbbde78f1dc8fab151719c1b497bc7eb0e564460197f00140df"
+      },
+      "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json": {
+        "sha256": "63522048eb9828c8ce43856a8755486aba6b713335b15fd1bc376cf43b614eec"
+      },
+      "expense.json": {
+        "sha256": "a8bfb2fb07e3e4f60de152d92bbe1da39115ccdb4c4a257300c355ccc9e93b21"
+      }
+    },
+    "config_sources": [
+      {
+        "path": "/tmp/hdr-demo-6m9vw2pk/claude/settings.json",
+        "sha256": null
+      },
+      {
+        "path": "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.json",
+        "sha256": "63522048eb9828c8ce43856a8755486aba6b713335b15fd1bc376cf43b614eec"
+      },
+      {
+        "path": "/tmp/hdr-demo-6m9vw2pk/repo/.claude/settings.local.json",
+        "sha256": null
+      }
+    ],
+    "event": {}
+  },
+  "selected_findings": [
+    {
+      "id": "HDR-006",
+      "status": "FAIL",
+      "message": "Expense belongs to the event budget",
+      "source": ".hdr/decisions/HDR-006.json",
+      "paths": [
+        "expense.json"
+      ]
+    }
+  ],
+  "history_at_recorded_head": {
+    ".hdr/decisions/HDR-006.json": "67bd451 2026-10-21T10:21:18+02:00 Require event allocation",
+    "expense.json": "67bd451 2026-10-21T10:21:18+02:00 Require event allocation"
+  },
+  "note": "History is correlation, not proof of agent authorship. Local reports are not tamper-proof."
+}
+
+5. Repair the allocation
+PASS  HDR-001         SessionStart: HDR hook registered on disk
+PASS  HDR-002         PreToolUse: HDR hook registered on disk
+PASS  HDR-003         PostToolUse: HDR hook registered on disk
+PASS  HDR-004         Stop: HDR hook registered on disk
+PASS  HDR-006         Expense belongs to the event budget
+Action rules: ['HDR-005'] (evaluated on PreToolUse)
+Scope: repository state and observed settings files only. Managed policy, launch flags, plugin hooks, sandboxing and live configuration are not attested.
+Run: 6374da3a830342ddb1d8f928abd09dbb
+Complete. Inspect the saved reports in /tmp/hdr-demo-6m9vw2pk/repo/.hdr/runs/

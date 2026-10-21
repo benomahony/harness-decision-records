@@ -1,0 +1,132 @@
+---
+.title = "Decision history",
+.description = "Every decision keeps its own append-only history. The latest entry is what HDR enforces.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "page.shtml",
+.custom = { "section": "Concepts", "prev": "decisions", "next": "harnesses" },
+---
+
+Each file in `.hdr/decisions/` is one decision and holds that decision's whole
+history, oldest entry first. Entries are only ever appended. Nothing in a
+decision's past is edited or removed.
+
+# One decision, one log
+
+```json
+{
+  "schema_version": 2,
+  "id": "HDR-003",
+  "history": [
+    {
+      "date": "2026-10-21",
+      "title": "Agents may not use shell tools",
+      "rationale": "Shell commands can change anything, including the decision log.",
+      "check": { "kind": "tool_denied", "tools": ["Bash"] }
+    },
+    {
+      "date": "2026-11-02",
+      "title": "Shell is allowed; the decision log is protected instead",
+      "rationale": "The ban blocked builds and tests; the log now guards itself.",
+      "check": { "kind": "path_exists", "path": ".hdr" }
+    }
+  ]
+}
+```
+
+Reading the file top to bottom tells you what the decision was, how it changed
+and why. Reading the last entry tells you what applies now.
+
+# Current decisions
+
+The **current decisions** are the last entry of every decision that has not
+been retired. Only current decisions are checked. Earlier entries stay in the
+file as history and are never evaluated.
+
+| Decision | Latest entry | Current? |
+| --- | --- | --- |
+| `HDR-001` | Decision records are append-only | yes |
+| `HDR-002` | Register HDR checks for every lifecycle event | yes |
+| `HDR-003` | Shell is allowed; the decision log is protected instead | yes, as revised |
+| `HDR-004` | Retired: "Too blunt" | no |
+
+`hdr validate` reports both numbers, for example
+`PASS: 3 current decisions (4 decision files)`, and `hdr explain` shows each
+decision's full history.
+
+# Changing a decision
+
+To change a decision, append an entry to its history. To stop enforcing it,
+append a retirement:
+
+```json
+{ "date": "2026-12-01", "status": "retired", "rationale": "Replaced by HDR-007." }
+```
+
+A retired decision stays in the repository so its history remains readable.
+The first entry of a history must be a decision, not a retirement, and dates are
+optional `YYYY-MM-DD` strings.
+
+To merge several decisions into one, retire each of them with a rationale that
+names the replacement, and add the replacement as a new decision.
+
+# Who may change what
+
+| Change | Agent | Person |
+| --- | --- | --- |
+| Add a new decision with one entry | allowed | allowed |
+| Append an entry to an existing decision | denied | allowed |
+| Retire a decision | denied | allowed |
+| Edit or remove an earlier entry | denied | flagged while a session runs |
+
+When an agent writes a new decision, HDR validates it first. An invalid
+decision, a duplicate ID, or a new file that already carries more than one
+entry is denied with the reason, so the agent can fix its mistake or ask a
+person.
+
+># [Note]($block)
+>HDR cannot tell who wrote a file. "Person" means a change made outside the
+>agent's tool calls, such as in your editor. Shell commands an agent runs are not
+>parsed; their effects are judged by the same history rules after the fact.
+
+# How it is enforced
+
+**Before a tool runs.** Each harness's file-editing tools are translated into
+plain *edit* and *write* operations. An agent's edit or overwrite of an existing
+decision file is denied; writing a new decision file is validated as above. This
+includes `apply_patch` in Codex and opencode. See
+[Harnesses]($link.page('harnesses')) for the tool mapping.
+
+**Throughout the session.** When a session starts, HDR records every decision
+file's digest and history in a per-session baseline under
+`$XDG_STATE_HOME/hdr/sessions/`. On every later hook it compares the files with
+that baseline:
+
+- a new decision file is accepted and added to the baseline;
+- a decision whose earlier entries are all unchanged, in order, with new entries
+  after them, is accepted, and the new entries take effect immediately;
+- anything else, such as a rewritten or removed entry or a deleted file, fails
+  until the original history is restored.
+
+This is what lets a person add or revise decisions during a session without
+restarting it. The decision log is always checked this way, even without an
+`append_only` decision; the built-in check is reported as `LOG-INTEGRITY`.
+
+# Session baselines
+
+- The baseline survives resume and compaction, which reuse the session ID.
+- A new session starts a new baseline from whatever is on disk.
+- Each harness keeps its own baselines, so sessions in different harnesses never
+  collide.
+
+# Rewriting history
+
+You own the repository, so you can still rewrite a decision's history, for
+example to fix a typo in an old entry. Do it between sessions: within a session,
+any change that is not an append fails by design.
+
+># [Caution]($block.attrs('warning'))
+>Decision files are append-only, so their format must stay readable forever.
+>Older single-record files (`"schema_version": 1`) are still read as one-entry
+>histories, and replacing one with a `history` whose first entry matches the old
+>record counts as an append. Their `supersedes` field, which retired other
+>records, still works too.

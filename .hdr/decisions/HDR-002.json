@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "id": "HDR-002",
+  "title": "Register PreToolUse checks",
+  "rationale": "Every supported lifecycle event must reach the deterministic checker.",
+  "check": {
+    "kind": "claude_hook",
+    "event": "PreToolUse"
+  }
+}

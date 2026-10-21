@@ -1,0 +1,17 @@
+name: HDR checks
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff
+      - run: uv sync --locked --group dev
+      - uses: benomahony/zanity@f2026638c73b0e26b230b9d39e73412e579cf8eb
+        with:
+          version: 0.1.26
+          args: check . --rules all --fail-on warning
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run basedpyright hdr
+      - run: uv run pytest -q

@@ -1,0 +1,98 @@
+---
+.title = "Writing decisions",
+.description = "The decision format, the checks HDR can run, and how much one decision should cover.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "page.shtml",
+.custom = { "section": "Concepts", "prev": "getting-started", "next": "history" },
+---
+
+# The decision format
+
+Store one decision per file in `.hdr/decisions/*.json`. The file holds the
+decision's history; a new decision has a single entry.
+
+```json
+{
+  "schema_version": 2,
+  "id": "HDR-004",
+  "history": [
+    {
+      "date": "2026-10-21",
+      "title": "Expense belongs to the event budget",
+      "rationale": "Event travel must be charged to the event, not team budgets.",
+      "check": {
+        "kind": "json_equals",
+        "path": "expense.json",
+        "pointer": "/budget",
+        "expected": "event"
+      }
+    }
+  ]
+}
+```
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `schema_version` | yes | The integer `2`. |
+| `id` | yes | `HDR-` followed by at least three digits. Unique across the repository. |
+| `history` | yes | Entries, oldest first. The last one is what applies now. |
+
+Each history entry is either a decision or a retirement:
+
+| Entry field | Meaning |
+| --- | --- |
+| `title` | The decision, stated as an outcome. |
+| `rationale` | Why the decision was made, or why it was retired. |
+| `check` | How the decision is verified. See below. |
+| `status` | `"retired"` in a retirement entry, which has only `status`, `rationale` and an optional `date`. |
+| `date` | Optional, `YYYY-MM-DD`. |
+
+How entries are added, and who may add them, is covered in
+[Decision history]($link.page('history')).
+
+Validation is strict. Unknown fields, unknown check kinds, duplicate IDs,
+duplicate JSON keys, and paths that escape the repository (including through
+symlinks) are all errors, in every entry of a history. An invalid decision file
+stops every check, so the hook fails closed rather than silently skipping it.
+
+# Check kinds
+
+Paths are relative to the repository root, not the working directory.
+
+| Kind | Fields | Passes when |
+| --- | --- | --- |
+| `json_equals` | `path`, `pointer`, `expected` | The JSON value at the RFC 6901 pointer equals `expected`. Booleans never equal numbers. |
+| `file_sha256` | `path`, `sha256` | The file's SHA-256 matches the pinned lowercase hex digest. |
+| `path_exists` | `path` | The path exists. |
+| `hdr_hooks` | `harnesses`, `events` | The HDR checker is registered for every listed event in every listed harness. |
+| `append_only` | `path` | Files under `path` are added but never edited, replaced or removed. |
+| `tool_denied` | `tools` | The tool about to run is not in the list. Names are each harness's own tool names. |
+| `claude_hook` | `events` or `event` | Legacy form of `hdr_hooks` for Claude only. Still accepted so old records keep working. |
+
+`hdr_hooks` and `tool_denied` and `append_only` are evaluated against live hook
+events, so `hdr check` cannot show their outcome on its own. `hdr explain` labels
+them **HOOK-TIME**.
+
+There is no way to run an arbitrary command, ask a model, or express an
+exception or override. That is deliberate: every outcome is reproducible from
+the files on disk.
+
+# Decision grain
+
+One file holds one decision: the outcome a human would state and defend in one
+sentence, with one rationale. The check is how that decision is verified, not the
+unit of decision.
+
+- **Group checks that share a rationale.** "Every lifecycle event reaches the
+  checker in every harness we use" is one decision, so it is one `hdr_hooks`
+  decision listing all harnesses and events, not one decision per event.
+- **Split when the parts could change independently.** If you can imagine
+  revising or retiring one part while keeping the other, they are two decisions.
+- **Title the outcome, not the mechanism.** "Expense belongs to the event
+  budget", not "`/budget` equals `event`".
+- **Prefer a coarser decision now.** Histories are append-only. A decision that
+  is too fine can only be tidied up by retiring it, and it stays in the
+  repository for good.
+
+Agents are given a short version of this guidance when a session starts,
+because they are allowed to add new decisions too.

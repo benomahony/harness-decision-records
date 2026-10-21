@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head id="head">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title :text="$page.title.suffix(' · HDR')"></title>
+		<meta name="description" :content="$page.description">
+		<link rel="icon" type="image/svg+xml" href="$site.asset('logo.svg').link()">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+		<link type="text/css" rel="stylesheet" href="$site.asset('style.css').link()">
+		<script defer src="$site.asset('site.js').link()"></script>
+		<super>
+	</head>
+	<body id="body">
+		<header class="topbar">
+			<div class="topbar-inner">
+				<a class="brand" href="$site.page('').link()">
+					<img src="$site.asset('logo.svg').link()" alt="" width="28" height="28">
+					<span>HDR</span>
+				</a>
+				<nav class="topnav">
+					<a href="$site.page('getting-started').link()">Docs</a>
+					<a href="$site.page('harnesses').link()">Harnesses</a>
+					<a href="$site.page('limits').link()">Limits</a>
+					<a class="button small" href="$site.page('getting-started').link()">Get started</a>
+				</nav>
+			</div>
+		</header>
+		<super>
+		<footer class="footer">
+			<div class="footer-inner">
+				<div class="brand muted-brand">
+					<img src="$site.asset('logo.svg').link()" alt="" width="22" height="22">
+					<span>Harness Decision Records</span>
+				</div>
+				<p>Deterministic, append-only rules for coding agents. A prototype; read the <a href="$site.page('limits').link()">limits</a> before relying on it.</p>
+			</div>
+		</footer>
+	</body>
+</html>

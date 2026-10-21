@@ -1,0 +1,6 @@
+zanity: checked 11 files, no issues found
+All checks passed!
+9 files already formatted
+0 errors, 0 warnings, 0 notes
+....................                                               [100%]
+20 passed, 6 subtests passed in 3.31s

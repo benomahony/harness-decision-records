@@ -1,0 +1,58 @@
+---
+.title = "Limits",
+.description = "What HDR checks, what it cannot see, and where its evidence stops.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "page.shtml",
+.custom = { "section": "Reference", "prev": "cli" },
+---
+
+HDR is local governance, not a sandbox. It is only as strong as the harness's
+willingness to call it.
+
+# It cannot alert on its own absence
+
+A harness that never runs the hook never hears from HDR. The `hdr_hooks` check
+confirms that the checker is registered in the files HDR can read, which is not
+the same as running:
+
+- Codex skips project hooks in untrusted projects and any hook nobody has
+  approved in `/hooks`. HDR cannot see that approval.
+- Managed and server settings, launch flags, plugin-provided hooks and extra
+  workspaces are not inspected.
+- If the hook process crashes or times out, Claude Code and Codex decide what
+  happens next. The opencode and pi plugins deny the tool call.
+
+# Detection is not prevention
+
+Shell commands are not parsed. A file changed through a shell, a subagent that
+bypasses hooks, or another process is caught on the next hook by the session
+baseline, after the change has happened. Restoring the file clears the failure.
+
+A new session takes a fresh baseline from whatever is on disk. A change made
+between sessions, or before `/clear` starts a new one, is accepted into the new
+baseline.
+
+# Evidence is local
+
+Run reports and session baselines are plain files that any local process can
+modify. They are useful evidence, not tamper-proof attestation. The checker's own
+source and interpreter are not part of what HDR protects.
+
+# Some harness behaviour is weaker
+
+- opencode can only warn when a Stop check fails, and does not run plugin hooks
+  for subagent tool calls.
+- Codex enforcement has not yet been verified in a live session.
+- `tool_denied` matches exact tool names in each harness's own vocabulary.
+
+# Cost
+
+Every hooked tool call starts a Python process twice, before and after the call.
+Each run re-reads the decisions and settings and runs two quick Git commands.
+
+# Verification of HDR itself
+
+The test suite exercises real files, real Git history, CLI exit codes, hook
+payloads for every harness, and the generated opencode and pi plugins under Node.
+The repository's `scripts/check.sh` also runs Zanity, Ruff and strict type
+checking.

@@ -1,0 +1,43 @@
+<extend template="base.shtml">
+<head id="head">
+</head>
+<body id="body">
+	<div class="docs">
+		<nav class="sidebar" aria-label="Documentation">
+			<p class="sidebar-group">Start here</p>
+			<a href="$site.page('getting-started').link()" class="$site.page('getting-started').isCurrent().then('active', '')">Getting started</a>
+			<p class="sidebar-group">Concepts</p>
+			<a href="$site.page('decisions').link()" class="$site.page('decisions').isCurrent().then('active', '')">Writing decisions</a>
+			<a href="$site.page('history').link()" class="$site.page('history').isCurrent().then('active', '')">Decision history</a>
+			<p class="sidebar-group">Integrations</p>
+			<a href="$site.page('harnesses').link()" class="$site.page('harnesses').isCurrent().then('active', '')">Harnesses</a>
+			<p class="sidebar-group">Reference</p>
+			<a href="$site.page('cli').link()" class="$site.page('cli').isCurrent().then('active', '')">CLI reference</a>
+			<a href="$site.page('limits').link()" class="$site.page('limits').isCurrent().then('active', '')">Limits</a>
+		</nav>
+		<main class="doc">
+			<p class="eyebrow" :text="$page.custom.getOr('section', 'Docs')"></p>
+			<h1 :text="$page.title"></h1>
+			<p class="lede" :text="$page.description"></p>
+			<article class="prose" :html="$page.content()"></article>
+			<nav class="pager">
+				<ctx :if="$page.custom.get?('prev')">
+					<a class="pager-link" href="$site.page($if).link()">
+						<span>Previous</span>
+						<strong :text="$site.page($if).title"></strong>
+					</a>
+				</ctx>
+				<ctx :if="$page.custom.get?('next')">
+					<a class="pager-link next" href="$site.page($if).link()">
+						<span>Next</span>
+						<strong :text="$site.page($if).title"></strong>
+					</a>
+				</ctx>
+			</nav>
+		</main>
+		<aside class="toc">
+			<p class="toc-title">On this page</p>
+			<ul class="toc-list"></ul>
+		</aside>
+	</div>
+</body>

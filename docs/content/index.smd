@@ -1,0 +1,6 @@
+---
+.title = "Rules your coding agents can't quietly rewrite",
+.description = "Harness Decision Records keep your team's agent rules as decisions in the repository, each with an append-only history, and check every tool call against them in Claude Code, Codex, opencode and pi.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "home.shtml",
+---

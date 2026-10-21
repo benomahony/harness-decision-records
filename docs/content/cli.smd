@@ -1,0 +1,52 @@
+---
+.title = "CLI reference",
+.description = "Every hdr command, its options and its exit codes.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "page.shtml",
+.custom = { "section": "Reference", "prev": "harnesses", "next": "limits" },
+---
+
+All commands accept `--root PATH` to select a repository; by default HDR walks up
+from the current directory to the nearest `.hdr`, stopping at the Git repository
+boundary.
+
+| Command | What it does |
+| --- | --- |
+| `hdr init [--harness NAME]...` | Create `.hdr/` with the two seed decisions. Refuses to overwrite. |
+| `hdr install HARNESS --user`\|`--project` | Register the checker with `claude`, `codex`, `opencode` or `pi`. |
+| `hdr validate` | Strictly validate every decision file and print how many decisions are current. |
+| `hdr check [--json]` | Run all checks and save a run report. |
+| `hdr inspect [--json]` | Run the same checks without saving a report. |
+| `hdr doctor [--json]` | Like `inspect`, with repair guidance. |
+| `hdr explain [--no-open]` | Write `.hdr/runs/report.html` and open it in a browser. |
+| `hdr trace RUN_ID [--decision ID]` | Show a saved run with Git history for the files it used. |
+| `hdr hook [--harness NAME]` | Handle one hook event from standard input. Harnesses call this; you do not. |
+
+# Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Every evaluated check passed. |
+| `1` | At least one check failed. |
+| `2` | Invalid input, unreadable evidence or an execution error. |
+
+# Run reports
+
+`check` and every hook write a JSON report to `.hdr/runs/`. A report holds the
+findings, record and evidence hashes, the configuration files inspected, Git
+`HEAD` and dirty status, and the hook event's name, session, tool name and
+harness.
+
+Tool inputs, file contents, prompts, transcripts and environment values are never
+recorded. Reports can still contain paths, decision titles and error text, so
+review them before sharing.
+
+`trace` reads history at the `HEAD` recorded in the run, not today's `HEAD`. Git
+history shows correlation, not proof of who authored a change.
+
+# Hook input
+
+`hdr hook` expects one JSON object of at most 1 MiB with at least
+`hook_event_name`, `session_id` and `cwd`. Supported events are `SessionStart`,
+`PreToolUse`, `PostToolUse` and `Stop`. Responses follow Claude Code's hook
+format; the opencode and pi plugins translate them.

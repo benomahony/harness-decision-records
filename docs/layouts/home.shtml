@@ -1,0 +1,193 @@
+<extend template="base.shtml">
+<head id="head">
+</head>
+<body id="body">
+	<main class="home">
+		<section class="hero">
+			<div class="hero-copy">
+				<p class="pill">For Claude Code · Codex · opencode · pi</p>
+				<h1>Rules your coding agents can’t quietly rewrite.</h1>
+				<p class="hero-lede">
+					Harness Decision Records keep your team’s agent rules as decisions in the
+					repository, each with its own append-only history, and check every tool call
+					against the current set. Deterministic, local, and the same in every harness.
+				</p>
+				<div class="cta-row">
+					<a class="button" href="$site.page('getting-started').link()">Get started →</a>
+					<a class="button ghost" href="#how">How it works</a>
+				</div>
+				<div class="install">
+					<span class="prompt">$</span>
+					<code>hdr init &amp;&amp; hdr install claude --project</code>
+					<button class="copy" type="button" data-copy="hdr init &amp;&amp; hdr install claude --project">Copy</button>
+				</div>
+			</div>
+			<figure class="terminal" aria-label="An agent's edit to a decision record being blocked">
+				<div class="terminal-bar">
+					<span></span><span></span><span></span>
+					<p>pi · scratch repository</p>
+				</div>
+				<div class="terminal-body">
+					<p class="t-user">› Change the title in .hdr/decisions/HDR-001.json</p>
+					<p class="t-tool">● edit <span class="t-path">.hdr/decisions/HDR-001.json</span></p>
+					<div class="t-block">
+						<p class="t-blocked">✕ Blocked by HDR</p>
+						<p><span class="t-fail">FAIL</span> HDR-001  Decision records are append-only:</p>
+						<p class="t-indent">edit would alter HDR-001.json; append a new record instead</p>
+					</div>
+					<p class="t-agent">The edit tool call was blocked by the HDR hook. The file .hdr/decisions/HDR-001.json was not modified. Per the HDR rules, a new record should be appended to supersede it.</p>
+				</div>
+				<figcaption>Real output from a live pi 0.84.4 session, trimmed.</figcaption>
+			</figure>
+		</section>
+
+		<section class="band">
+			<div class="section-head">
+				<p class="eyebrow">Why HDR</p>
+				<h2>Instructions are suggestions. Decisions should be checked.</h2>
+			</div>
+			<div class="cards three">
+				<article class="card">
+					<div class="icon">¶</div>
+					<h3>Prompts aren’t policy</h3>
+					<p>Rules in <code>CLAUDE.md</code> or <code>AGENTS.md</code> are weighed by a model. HDR rules are checked by code before the tool runs, with the same answer every time.</p>
+				</article>
+				<article class="card">
+					<div class="icon">⊘</div>
+					<h3>Guardrails an agent can edit aren’t guardrails</h3>
+					<p>Agents can propose new decisions, but never change the ones that govern them. Only people revise or retire a decision, by appending to its history.</p>
+				</article>
+				<article class="card">
+					<div class="icon">✓</div>
+					<h3>You can show what happened</h3>
+					<p>Every check leaves a JSON report. <code>hdr explain</code> turns your decisions, their history, hook coverage and recent runs into a page a reviewer can read.</p>
+				</article>
+			</div>
+		</section>
+
+		<section class="band" id="how">
+			<div class="section-head">
+				<p class="eyebrow">How it works</p>
+				<h2>Three steps, then every tool call is checked.</h2>
+			</div>
+			<ol class="steps">
+				<li class="step">
+					<p class="step-num">1</p>
+					<div>
+						<h3>Write the decision</h3>
+						<p>One small JSON file per decision, committed next to the code. Its history grows over time; the latest entry is what applies, and its <code>check</code> says how a machine verifies it.</p>
+						<pre><code>{
+  "schema_version": 2,
+  "id": "HDR-003",
+  "history": [{
+    "date": "2026-10-21",
+    "title": "Expense belongs to the event budget",
+    "rationale": "Event travel is charged to the event.",
+    "check": {
+      "kind": "json_equals",
+      "path": "expense.json",
+      "pointer": "/budget",
+      "expected": "event"
+    }
+  }]
+}</code></pre>
+					</div>
+				</li>
+				<li class="step">
+					<p class="step-num">2</p>
+					<div>
+						<h3>Install once per harness</h3>
+						<p>HDR registers one checker with each harness your team uses, for the project or for your whole machine.</p>
+						<pre><code>hdr install claude --project
+hdr install opencode --project
+hdr install pi --user</code></pre>
+					</div>
+				</li>
+				<li class="step">
+					<p class="step-num">3</p>
+					<div>
+						<h3>Every tool call is checked</h3>
+						<p>The checker runs at session start, before and after every tool call, and when the agent stops.</p>
+						<ul class="outcomes">
+							<li><strong>Before:</strong> a violating call is denied, with the reason.</li>
+							<li><strong>After:</strong> a broken state is fed back to the agent.</li>
+							<li><strong>On stop:</strong> the agent is asked to put things right.</li>
+						</ul>
+					</div>
+				</li>
+			</ol>
+		</section>
+
+		<section class="band">
+			<div class="section-head">
+				<p class="eyebrow">Harnesses</p>
+				<h2>One log. Every agent your team runs.</h2>
+				<p>Each harness gets the same rules through the integration it supports best.</p>
+			</div>
+			<div class="cards four">
+				<a class="card harness" href="$site.page('harnesses').link()">
+					<p class="status ok">Verified live</p>
+					<h3>Claude Code</h3>
+					<p>Command hooks in <code>.claude/settings.json</code>.</p>
+				</a>
+				<a class="card harness" href="$site.page('harnesses').link()">
+					<p class="status ok">Verified live</p>
+					<h3>opencode</h3>
+					<p>A generated plugin in <code>.opencode/plugins/</code>.</p>
+				</a>
+				<a class="card harness" href="$site.page('harnesses').link()">
+					<p class="status ok">Verified live</p>
+					<h3>pi</h3>
+					<p>A generated extension in <code>.pi/extensions/</code>.</p>
+				</a>
+				<a class="card harness" href="$site.page('harnesses').link()">
+					<p class="status pending">Live check pending</p>
+					<h3>Codex</h3>
+					<p>Command hooks in <code>.codex/hooks.json</code>; needs trust and approval.</p>
+				</a>
+			</div>
+		</section>
+
+		<section class="band">
+			<div class="section-head">
+				<p class="eyebrow">Principles</p>
+				<h2>Deliberately boring, so you can trust it.</h2>
+			</div>
+			<div class="cards three principles">
+				<article class="card flat">
+					<h3>Deterministic</h3>
+					<p>No model calls, prompt judges or network requests. Every outcome comes from files on disk.</p>
+				</article>
+				<article class="card flat">
+					<h3>Every decision keeps its history</h3>
+					<p>Decisions change by appending, never by editing. Read any decision file top to bottom to see what it was, what it is, and why.</p>
+				</article>
+				<article class="card flat">
+					<h3>Fails closed</h3>
+					<p>Invalid records stop every check. Plugins deny tool calls when the checker cannot run.</p>
+				</article>
+				<article class="card flat">
+					<h3>Evidence by default</h3>
+					<p>Each run records findings and hashes, but never tool inputs, prompts or file contents.</p>
+				</article>
+				<article class="card flat">
+					<h3>No dependencies</h3>
+					<p>Python 3.11 and the standard library. Nothing to vendor, nothing to update.</p>
+				</article>
+				<article class="card flat">
+					<h3>Honest about limits</h3>
+					<p>It is governance, not a sandbox. <a href="$site.page('limits').link()">The limits page</a> says exactly where it stops.</p>
+				</article>
+			</div>
+		</section>
+
+		<section class="final-cta">
+			<h2>Write your first decision in five minutes.</h2>
+			<p>Seed your first decisions, install the checker, and watch the next agent session respect them.</p>
+			<div class="cta-row center">
+				<a class="button" href="$site.page('getting-started').link()">Read the guide →</a>
+				<a class="button ghost" href="$site.page('decisions').link()">How to write decisions</a>
+			</div>
+		</section>
+	</main>
+</body>

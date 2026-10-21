@@ -1,0 +1,115 @@
+---
+.title = "Harnesses",
+.description = "How HDR plugs into Claude Code, Codex, opencode and pi, and what each one can and cannot enforce.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "page.shtml",
+.custom = { "section": "Integrations", "prev": "history", "next": "cli" },
+---
+
+Every harness runs the same checker, `hdr hook`, which reads one event as JSON on
+standard input and answers in Claude Code's hook format. Claude Code and Codex
+call it directly as a command hook. opencode and pi load code in-process instead,
+so HDR installs a small generated plugin that converts their events, runs the
+checker, and turns its answer into that harness's way of blocking.
+
+# At a glance
+
+| Harness | Installed as | Project location | Blocks tool calls | Failing Stop check |
+| --- | --- | --- | --- | --- |
+| Claude Code | Command hooks in settings | `.claude/settings.json` | yes | Agent is asked to continue once |
+| Codex | Command hooks | `.codex/hooks.json` | yes, see status below | Agent is asked to continue once |
+| opencode | Generated plugin | `.opencode/plugins/hdr.ts` | yes | Warning only |
+| pi | Generated extension | `.pi/extensions/hdr.ts` | yes | One follow-up message, then control returns |
+
+User-level installs go to `~/.claude/settings.json`, `$CODEX_HOME/hooks.json`,
+`$XDG_CONFIG_HOME/opencode/plugins/hdr.ts` and
+`$PI_CODING_AGENT_DIR/extensions/hdr.ts`, each falling back to the harness's
+usual home directory.
+
+# How file tools are recognised
+
+The append-only guard needs to know when a tool call edits a file. Each
+harness's native tools are mapped to the same two operations:
+
+| Harness | Treated as an edit | Treated as a write |
+| --- | --- | --- |
+| Claude Code | `Edit`, `MultiEdit`, `NotebookEdit` | `Write` |
+| Codex | `apply_patch` update, delete or move | `apply_patch` add |
+| opencode | `edit`, `apply_patch` update, delete or move | `write`, `apply_patch` add |
+| pi | `edit` | `write` |
+
+Shell tools are not parsed. Changes made through a shell are caught afterwards
+by the session baseline, as described in [Decision history]($link.page('history')).
+`tool_denied` decisions use each harness's own tool names, so a rule for Claude's
+`Bash` does not cover pi's `bash`.
+
+# Claude Code
+
+```sh
+hdr install claude --project
+```
+
+The reference integration. Hooks are added to the settings file for
+`SessionStart`, `PreToolUse`, `PostToolUse` and `Stop`, keeping any existing
+settings and a one-time `.hdr-backup` copy. HDR also reads the user, project and
+local settings and flags `disableAllHooks` and a configured `bypassPermissions`
+mode. A session running in bypass mode has every tool call denied.
+
+# Codex
+
+```sh
+hdr install codex --project
+```
+
+Codex uses the same hook protocol and event names as Claude Code, so the
+integration is the same command written to `.codex/hooks.json`. `apply_patch`
+envelopes are parsed so each file they touch is checked.
+
+># [Status: not yet verified live]($block.attrs('warning'))
+>The installer and payload handling are covered by tests, but enforcement has not
+>yet been confirmed in a real Codex session. Codex loads project hooks only when
+>the project is trusted, and skips any non-managed hook until someone approves it
+>in `/hooks`. Approval is tied to the hook's hash, so reinstalling HDR asks for
+>approval again. `hdr check` can only see that the hooks are on disk, not whether
+>Codex approved them.
+
+Hosted tools such as web search do not trigger Codex hooks.
+
+# opencode
+
+```sh
+hdr install opencode --project
+```
+
+HDR writes a plugin to `.opencode/plugins/hdr.ts`. It uses `tool.execute.before`
+to block a call by throwing the HDR reason, `tool.execute.after` to append
+feedback to the tool's output, and session events for start and stop.
+
+- A failing Stop check only shows a warning toast: a plugin cannot make an idle
+  session continue.
+- At the time of writing, opencode does not run `tool.execute.before` for tool
+  calls made by subagents ([opencode#5894](https://github.com/anomalyco/opencode/issues/5894)).
+  Those calls are only caught afterwards by the session baseline.
+
+# pi
+
+```sh
+hdr install pi --project
+```
+
+HDR writes an extension to `.pi/extensions/hdr.ts`. It blocks through
+`tool_call`, appends feedback to tool results through `tool_result`, gives the
+agent the session-start context through `before_agent_start`, and checks Stop
+through `agent_end`.
+
+- pi loads project extensions only after you trust the project. Non-interactive
+  runs need `--approve` or a saved trust decision.
+- A failing Stop check sends one follow-up message asking for a correction, then
+  returns control, mirroring Claude Code's behaviour.
+
+# Plugins fail closed
+
+The opencode and pi plugins deny the tool call if the checker cannot run at all,
+for example if Python is missing or the hook times out. HDR counts a plugin as
+installed only while it matches the generated file byte for byte, so a hand-edited
+plugin is reported as missing. Reinstall rather than edit it.

@@ -1,0 +1,16 @@
+{
+  "zanity_version": "0.1.26",
+  "zanity_commit": "f2026638c73b0e26b230b9d39e73412e579cf8eb",
+  "binary_sha256": "cc96725c1a55405c83de55e0e2a5b6e480f86efd9604b9ede48a2544c47a7168",
+  "command": "zanity check . --rules all --fail-on warning",
+  "findings": 0,
+  "checked_files": 11,
+  "infer": false,
+  "suppressed_rules": [],
+  "disabled_rules": [],
+  "excluded_source_paths": [],
+  "python_version": "3.12.14",
+  "tests_passed": 20,
+  "subtests_passed": 6,
+  "live_claude_tested": false
+}

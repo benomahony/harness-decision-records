@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "id": "HDR-005",
+  "title": "Disable shell tools in this demo",
+  "rationale": "Demonstrate exact tool denial without pretending to parse shell semantics.",
+  "check": {
+    "kind": "tool_denied",
+    "tools": [
+      "Bash",
+      "PowerShell"
+    ]
+  }
+}

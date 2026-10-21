@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "id": "HDR-001",
+  "title": "Register SessionStart checks",
+  "rationale": "Every supported lifecycle event must reach the deterministic checker.",
+  "check": {
+    "kind": "claude_hook",
+    "event": "SessionStart"
+  }
+}

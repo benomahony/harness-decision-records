@@ -1,0 +1,52 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/benomahony/Code/open_source/hdr-prototype/.venv/bin/python /Users/benomahony/Code/open_source/hdr-prototype/hdr/runner.py hook",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/benomahony/Code/open_source/hdr-prototype/.venv/bin/python /Users/benomahony/Code/open_source/hdr-prototype/hdr/runner.py hook",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/benomahony/Code/open_source/hdr-prototype/.venv/bin/python /Users/benomahony/Code/open_source/hdr-prototype/hdr/runner.py hook",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/benomahony/Code/open_source/hdr-prototype/.venv/bin/python /Users/benomahony/Code/open_source/hdr-prototype/hdr/runner.py hook",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
